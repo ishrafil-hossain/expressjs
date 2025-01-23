@@ -42,7 +42,7 @@ const getUsers = async (req, res) => {
   }
 };
 
-// get single user function 
+// get single user function
 const getSingleUser = async (req, res) => {
   try {
     const userId = req.params.id || req.query.id;
@@ -65,4 +65,69 @@ const getSingleUser = async (req, res) => {
   }
 };
 
-module.exports = { welcome, createUser, getUsers, getSingleUser };
+// update user function
+const updateUser = async (req, res) => {
+  try {
+    const userId = req.params.id || req.query.id;
+    const user = await UserModel.findById(userId);
+    if (user) {
+      user.name = req.body.name || user.name;
+      user.email = req.body.email || user.email;
+      if (req.body.password) {
+        user.password = req.body.password;
+      }
+      const updatedUser = await user.save();
+      res.status(201).json({
+        success: true,
+        message: "User updated successfully",
+        updatedUser,
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+  } catch (error) {
+    res.status(401).json({
+      success: false,
+      message: "User not updated! please try again",
+      error: error.message,
+    });
+  }
+};
+
+// delete user
+const deleteUser = async (req, res) => {
+  try {
+    const userId = req.params.id || req.query.id;
+    const user = await UserModel.findById(userId);
+    if (user) {
+      await user.deleteOne();
+      res.status(201).json({
+        success: true,
+        message: "user deleted successfully",
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+  } catch (error) {
+    res.status(401).json({
+      success: false,
+      message: "user didn't delete! try again",
+      error: error.message,
+    });
+  }
+};
+
+module.exports = {
+  welcome,
+  createUser,
+  getUsers,
+  getSingleUser,
+  updateUser,
+  deleteUser,
+};
